@@ -11,6 +11,29 @@ router.post('/create', async (req, res) => {
     res.status(response.code).json(response.message);
 });
 
+router.post('/bulkCreate', async (req, res) => {
+    const response = await UserService.bulkCreateUsers(req.body.users);
+    res.status(response.code).json(response.data);
+});
+
+router.get('/getAllUsers', async (req, res) => {
+    try {
+        const response = await UserService.getAllUsers();
+        res.status(response.code).json({ data: response.data || response.message });
+    } catch (error) {
+        res.status(500).json({ message: 'Error Interno del Servidor', error: error.message });
+    }
+});
+
+router.get('/findUsers', async (req, res) => {
+    try {
+        const response = await UserService.findUsers(req.query);
+        res.status(response.code).json({ data: response.data || response.message });
+    } catch (error) {
+        res.status(500).json({ message: 'Error Interno del Servidor', error: error.message });
+    }
+});
+
 router.get(
     '/:id',
     [
