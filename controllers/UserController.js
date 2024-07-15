@@ -11,7 +11,11 @@ router.post('/create', async (req, res) => {
     res.status(response.code).json(response.message);
 });
 
-router.post('/bulkCreateUsers', async (req, res) => {
+router.post('/bulkCreateUsers',
+    [
+        AuthMiddleware.validateToken
+    ],
+    async (req, res) => {
     const users = req.body;
     if (!Array.isArray(users) || users.length === 0) {
         return res.status(400).json({
@@ -24,22 +28,28 @@ router.post('/bulkCreateUsers', async (req, res) => {
 });
 
 router.get('/getAllUsers',
+    [
+        AuthMiddleware.validateToken
+    ],
     async (req, res) => {
     try {
         const response = await UserService.getAllUsers();
         res.status(response.code).json(response.message);
     } catch (error) {
-        res.status(500).json({ message: 'Error Interno del Servidor', error: error.message });
+        res.status(500).json({message: 'Error Interno del Servidor', error: error.message });
     }
 });
 
 router.get('/findUsers', 
+    [
+        AuthMiddleware.validateToken
+    ],
     async (req, res) => {
     try {
         const response = await UserService.findUsers(req.query);
         res.status(response.code).json(response.message);
     } catch (error) {
-        res.status(500).json({ message: 'Error Interno del Servidor', error: error.message });
+        res.status(500).json({message: 'Error Interno del Servidor', error: error.message });
     }
 });
 

@@ -191,6 +191,7 @@ const findUsers = async (query) => {
         };
     }
 };
+
 export default {
     createUser,
     getUserById,
