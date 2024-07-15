@@ -2,14 +2,14 @@ import db from '../dist/db/models/index.js';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
 
-const createUser = async (req) => {
+const createUser = async (data) => {
     const {
         name,
         email,
         password,
         password_second,
         cellphone
-    } = req.body;
+    } = data;
     if (password !== password_second) {
         return {
             code: 400,
@@ -48,29 +48,13 @@ const bulkCreateUsers = async (users) => {
     let failedCount = 0;
 
     for (const user of users) {
-        const { name, email, password, password_second, cellphone } = user;
-
-        if (password !== password_second) {
-            failedCount++;
-            continue;
-        }
-
-        const existingUser = await db.User.findOne({ where: { email } });
-        if (existingUser) {
-            failedCount++;
-            continue;
-        }
-
         try {
-            const encryptedPassword = await bcrypt.hash(password, 10);
-            await db.User.create({
-                name,
-                email,
-                password: encryptedPassword,
-                cellphone,
-                status: true
-            });
-            successfulCount++;
+            const response = await createUser(user);
+            if (response.code === 200) {
+                successfulCount++;
+            } else {
+                failedCount++;
+            }
         } catch (error) {
             failedCount++;
         }
@@ -79,10 +63,8 @@ const bulkCreateUsers = async (users) => {
     return {
         code: 200,
         message: 'Proceso de creación masiva completado',
-        data: {
-            successfulCount,
-            failedCount
-        }
+        successfulCount,
+        failedCount
     };
 };
 
@@ -152,8 +134,7 @@ const getAllUsers = async () => {
         });
         return {
             code: 200,
-            message: 'Usuario recibido',
-            data: users
+            message: users
         };
     } catch (error) {
         return {
@@ -199,8 +180,7 @@ const findUsers = async (query) => {
 
         return {
             code: 200,
-            message: 'Usuarios encontrados',
-            data: users,
+            message: users
         };
     } catch (error) {
         console.error('Error querying users:', error);
